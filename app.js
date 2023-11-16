@@ -4,7 +4,14 @@ document.addEventListener('DOMContentLoaded', () => {
   let password = '';
 
   const start = document.getElementById('start');
-  start.addEventListener('click', () => {
+  // Vanilla Javascript;
+  // start.addEventListener('click', () => {
+  //   toggleClasses(document.getElementById('start-screen'), 'hide', 'show');
+  //   toggleClasses(document.getElementById('game-screen'), 'hide', 'show');
+  //   startGame();
+  // });
+
+  $(start).click(() => {
     toggleClasses(document.getElementById('start-screen'), 'hide', 'show');
     toggleClasses(document.getElementById('game-screen'), 'hide', 'show');
     startGame();
@@ -12,7 +19,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function toggleClasses(element, ...classes) {
     for (let i = 0; i < classes.length; i++) {
-      element.classList.toggle(classes[i]);
+      // element.classList.toggle(classes[i]);
+      $(element).toggleClass(classes[i]);
     }
   }
 
@@ -22,17 +30,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // 'words' variable is from words.js
     const randomWords = getRandomValues(words, wordCount); // eslint-disable-line no-undef
     randomWords.forEach(word => {
-      let li = document.createElement('li');
-      li.innerText = word;
-      wordList.appendChild(li);
+      // Vanilla Javascript
+      // let li = document.createElement('li');
+      // li.innerText = word;
+      // wordList.appendChild(li);
+      let li = $("<li></li>").text(word);
+      $(wordList).append(li);
     });
 
     // set a secret password and the guess count display
     password = getRandomValues(randomWords, 1)[0];
+    console.log({ password })
     setGuessCount(guessCount);
 
     // add update listener for clicking on a word
-    wordList.addEventListener('click', updateGame);
+    // wordList.addEventListener('click', updateGame);
+    $(wordList).on('click', 'LI', updateGame);
   }
 
   function getRandomValues(array, numberOfVals) {
@@ -52,26 +65,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function setGuessCount(newCount) {
     guessCount = newCount;
-    document.getElementById('guesses-remaining').innerText =
-      `Guesses remaining: ${guessCount} .`;
+    // document.getElementById('guesses-remaining').innerText =
+    //   `Guesses remaining: ${guessCount} .`;
+    $('#guesses-remaining').text(`Guesses remaining: ${guessCount} .`);
   }
 
   function updateGame(e) {
     if (e.target.tagName === 'LI' && !e.target.classList.contains('disabled')) {
       // grab guessed word, check it against password, update view
-      const guess = e.target.innerText;
+      // const guess = e.target.innerText;
+      const { innerText: guess } = e.target;
       let similarityScore = compareWords(guess, password);
-      e.target.classList.add('disabled');
-      e.target.innerText = guess + ' --> Matching Letters: ' + similarityScore;
+      // e.target.classList.add('disabled');
+      // e.target.innerText = guess + ' --> Matching Letters: ' + similarityScore;
+      $(this).addClass('disabled');
+      $(this).text(guess + ' --> Matching Letters: ' + similarityScore);
       setGuessCount(guessCount - 1);
 
       // check whether the game is over 
       if (similarityScore === password.length) {
         toggleClasses(document.getElementById('winner'), 'hide', 'show');
-        this.removeEventListener('click', updateGame);
+        $(this).parent().off('click', updateGame);
       } else if (guessCount === 0) {
         toggleClasses(document.getElementById('loser'), 'hide', 'show');
-        this.removeEventListener('click', updateGame);
+        $(this).parent().off('click', updateGame);
       }
     }
   }
